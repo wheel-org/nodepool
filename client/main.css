@@ -56,3 +56,7 @@ input, button {
     background: rgba(255,255,255,0.5);
     margin: 0 0 10px 0;
 }
+
+.room-btn {
+	border: 1px solid black;
+}

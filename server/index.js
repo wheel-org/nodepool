@@ -12,14 +12,16 @@ http.listen(port, function() {
 var MAX_PLAYERS = 2;
 
 var sockets = {};
-var rooms = [];
+var rooms = [{
+	id: 0,
+	players: [1, 2],
+	spectators: [1, 2, 3, 4, 5]
+}];
 /*
 room object: {
 	id: room id (number)
 	players: list of players (max length MAX_PLAYERS)
 	spectators: list of spectators (unlimited)
-	public: boolean, whether anyone can play/spectate,
-	password: string, empty for public, nonempty for private
 }
 */
 
@@ -32,21 +34,13 @@ io.on('connection', function(socket) {
 	};
 
 	socket.on('start', function(name) {
+		console.log("New player: " + name);
 		currPlayer.name = name;
 		currPlayer.state = 0;
 		sockets[currPlayer.id] = socket;
 
-		var availRooms = rooms.reduce(function(acc, curr) {
-			if (curr && curr.public) {
-				acc.push({
-					id: curr.id,
-					numPlayers: curr.players.length,
-					numSpecs: curr.spectators.length
-				});
-			}
-			return acc;
-		}, []);
-		socket.emit('lobby', availRooms);
+
+		socket.emit('lobby', getAvailableRooms());
 	});
 
 	socket.on('createRoom', function() {
@@ -64,7 +58,10 @@ io.on('connection', function(socket) {
 	socket.on('joinRoom', function(roomId) {
 		if (rooms[roomId]) {
 			if (rooms[roomId].players >= MAX_PLAYERS) {
-				socket.emit('joined-spec', room)
+				socket.emit('joined-spec', rooms[roomId])
+			}
+			else {
+				socket.emit('joined-player', rooms[roomId]);
 			}
 		}
 		else {
@@ -80,6 +77,7 @@ io.on('connection', function(socket) {
 				rooms[currPlayer.room].players.splice(index, 1);
 			}
 			currPlayer.room = -1;
+			socket.emit('lobby', getAvailableRooms());
 		}
 		else {
 			socket.emit('error', 'Player is not in room');
@@ -103,4 +101,14 @@ function generateRoomId() {
 	var newId = Math.random() % 1000;
 	while (rooms[newId]) newId = Math.random() % 1000;
 	return newId;
+}
+
+function getAvailableRooms() {
+	return rooms.map(function(r) {
+		return {
+			id: r.id,
+			numPlayers: r.players.length,
+			numSpecs: r.spectators.length
+		}
+	});
 }
