@@ -5,28 +5,39 @@ var DRAG = 0.995;
 var BALL_RADIUS = 2.8575;
 var MAX_CUE_BALL_VEL = 5;
 
+var COLOR_BLUE = "#3465a4";
+var COLOR_BLACK = "#000000";
+var COLOR_YELLOW = "#fce94f";
+var COLOR_GREEN = "#8ae234";
+var COLOR_RED = "#ef2929";
+var COLOR_MAROON = "#a40000";
+var COLOR_ORANGE = "#f57900";
+var COLOR_PURPLE = "#5c3566";
+
 // 0 is White Ball
 var balls = [
-	ball(50, 51.5, "#FFF"),
-	ball(152.5, 51.5, "rgba(255, 0, 0, 1)"), // Front (1)
+	ball(50, 51.5, "#FFF", 0),
+	ball(152.5, 51.5, COLOR_YELLOW, 1), // Front (1)
 
-	ball(158, 48, "rgba(255, 0, 0, 1)"), // Second Row
-	ball(158, 55, "rgba(255, 0, 0, 1)"),  
+	ball(158, 55, COLOR_RED, 3), // Second Row
+	ball(158, 48, COLOR_RED, 11),  
 
-	ball(163.5, 51.5, "rgba(255, 0, 0, 1)"), // Center (8/Black)
-	ball(163.5, 44.5, "rgba(255, 0, 0, 1)"), // Surrounding Third Row
-	ball(163.5, 58.5, "rgba(255, 0, 0, 1)"),  
+	ball(163.5, 51.5, COLOR_BLACK, 8), // Center (8/Black)
+	ball(163.5, 44.5, COLOR_GREEN, 6), // Surrounding Third Row
+	ball(163.5, 58.5, COLOR_GREEN, 14),  
 
-	ball(169, 41, "rgba(255, 0, 0, 1)"),
-	ball(169, 48, "rgba(255, 0, 0, 1)"), // Fourth Row
-	ball(169, 55, "rgba(255, 0, 0, 1)"),  
-	ball(169, 62, "rgba(255, 0, 0, 1)"),
+	ball(169, 41, COLOR_YELLOW, 2),
+	ball(169, 48, COLOR_PURPLE, 4), // Fourth Row
+	ball(169, 55, COLOR_MAROON, 15),  
+	ball(169, 62, COLOR_ORANGE, 13),
 
-	ball(174.5, 37.5, "rgba(255, 0, 0, 1)"), // Fifth Row
-	ball(174.5, 44.5, "rgba(255, 0, 0, 1)"), 
-	ball(174.5, 51.5, "rgba(255, 0, 0, 1)"), 
-	ball(174.5, 58.5, "rgba(255, 0, 0, 1)"),  
-	ball(174.5, 65.5, "rgba(255, 0, 0, 1)")
+	ball(174.5, 37.5, COLOR_PURPLE, 12), // Fifth Row Corner 1
+
+	ball(174.5, 44.5, COLOR_ORANGE, 5), 
+	ball(174.5, 51.5, COLOR_BLUE, 10), 
+	ball(174.5, 58.5, COLOR_BLUE, 2),  
+
+	ball(174.5, 65.5, COLOR_MAROON, 7) // Fifth Row Corner 2
 ];
 
 var collidingWalls = [
@@ -60,7 +71,7 @@ function line(x1, y1, x2, y2) {
 		ny: x2 - x1
 	};
 }
-function ball(x, y, color) { 
+function ball(x, y, color, value) { 
 	return {
 		// X and y in cm
 		x: x,
@@ -71,7 +82,8 @@ function ball(x, y, color) {
 		dy: 0,
 		r: BALL_RADIUS,
 		mass: 0.160,
-		color: color
+		color: color,
+		value: value
 	};
 }
 
@@ -122,7 +134,7 @@ function simulateVelocityFrame(ball) {
 	ball.y += (ball.dy * 100) / DELTA_TIME;
 
 	if (ball.x < BALL_RADIUS) ball.x = BALL_RADIUS;
-	else if (ball.x > 200) ball.x = 200;
+	else if (ball.x > 210) ball.x = 210;
 
 	if (ball.y < BALL_RADIUS) ball.y = BALL_RADIUS;
 	else if (ball.y > 130 - BALL_RADIUS) ball.y = 130 - BALL_RADIUS;

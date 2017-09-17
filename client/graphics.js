@@ -77,11 +77,24 @@ function drawTableAndBalls() {
 	// White Dots
 	drawCircle(table_x + (TABLE_WIDTH / 2), table_y + (TABLE_HEIGHT / 2), TABLE_CIRCLE_MARKER);
 	drawCircle(table_x + TABLE_CUSHION_WIDTH + 3 * TABLE_WIDTH / 4, table_y + (TABLE_HEIGHT / 2), TABLE_CIRCLE_MARKER);
-	for (var i = 0; i < balls.length; i++) { 
+	// Balls
+	for (var i = 0; i < balls.length; i++) {
 		var ball = balls[i];
-		context.fillStyle = ball.color;
-		drawCircle(table_x + table_wood_and_cushion + ball.x * PHYSICAL_SCALE - BALL_DRAW_RADIUS,
-			table_y + table_wood_and_cushion + ball.y * PHYSICAL_SCALE - BALL_DRAW_RADIUS, BALL_DRAW_RADIUS);
+		var drawX = table_x + table_wood_and_cushion + ball.x * PHYSICAL_SCALE - BALL_DRAW_RADIUS;
+		var drawY = table_y + table_wood_and_cushion + ball.y * PHYSICAL_SCALE - BALL_DRAW_RADIUS;
+		if (ball.value <= 8) {
+			context.fillStyle = ball.color;
+		}
+		else { 
+			var gradient = context.createLinearGradient(drawX - BALL_DRAW_RADIUS, drawY, drawX + BALL_DRAW_RADIUS, drawY);
+			gradient.addColorStop("0", ball.color);
+			gradient.addColorStop("0.35", ball.color);
+			gradient.addColorStop("0.5", "#DDD");
+			gradient.addColorStop("0.65", ball.color);
+			gradient.addColorStop("1.0", ball.color);
+			context.fillStyle = gradient;
+		}
+		drawCircle(drawX, drawY, BALL_DRAW_RADIUS);
 	}
 	// Colliding Walls
 	if (DRAW_NORMALS || DRAW_BARRIER) {
