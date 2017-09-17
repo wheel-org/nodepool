@@ -41,6 +41,11 @@ function drawCircle(x, y, r) {
 	context.closePath();
 }
 
+function drawCircleWithOutline(x, y, r) { 
+	drawCircle(x, y, r);
+	context.stroke();
+}
+
 function drawTableAndBalls() { 
 	var table_x = (screenWidth - TABLE_WIDTH) / 2;
 	var table_y = (screenHeight - TABLE_HEIGHT) / 2;
@@ -94,7 +99,19 @@ function drawTableAndBalls() {
 			gradient.addColorStop("1.0", ball.color);
 			context.fillStyle = gradient;
 		}
-		drawCircle(drawX, drawY, BALL_DRAW_RADIUS);
+		//context.strokeStyle = "#FFF";
+		drawCircleWithOutline(drawX, drawY, BALL_DRAW_RADIUS);
+
+		if (mouseDown && i == 0) { 
+			var shootingDelta = calculateShootingDelta(mouseLocation);
+			context.strokeStyle = "#FFF";
+			context.beginPath();
+			context.moveTo(drawX, drawY);
+			console.log(shootingDelta);
+			context.lineTo(drawX + (shootingDelta[0] * 100), drawY + (shootingDelta[1] * 100));
+			context.stroke();
+			context.strokeStyle = "#000";
+		}
 	}
 	// Colliding Walls
 	if (DRAW_NORMALS || DRAW_BARRIER) {

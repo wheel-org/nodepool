@@ -6,13 +6,17 @@ var BALL_RADIUS = 2.8575;
 var MAX_CUE_BALL_VEL = 5;
 
 var COLOR_BLUE = "#3465a4";
-var COLOR_BLACK = "#000000";
+var COLOR_BLACK = "#222222";
 var COLOR_YELLOW = "#fce94f";
 var COLOR_GREEN = "#8ae234";
 var COLOR_RED = "#ef2929";
 var COLOR_MAROON = "#a40000";
 var COLOR_ORANGE = "#f57900";
 var COLOR_PURPLE = "#5c3566";
+
+var mouseDown = false;
+var mouseDownLocation;
+var mouseLocation;
 
 // 0 is White Ball
 var balls = [
@@ -227,18 +231,27 @@ function update() {
 	PREV_TIME = now;
 }
 
+function calculateShootingDelta(mouseLoc) { 
+	var dx = mouseLoc[0] - mouseDownLocation[0];
+	var dy = mouseLoc[1] - mouseDownLocation[1];
+	var angle = Math.atan2(dy, dx);
+	return [-Math.min(normalize([dx, dy]) / 100, MAX_CUE_BALL_VEL) * Math.cos(angle),
+	-Math.min(normalize([dx, dy]) / 100, MAX_CUE_BALL_VEL) * Math.sin(angle)];
+}
+
 $(document).ready(function () {
-	var prev;
 	$(document).mousedown(function(e) {
-		prev = [e.clientX, e.clientY];
+		mouseDownLocation = [e.clientX, e.clientY];
+		mouseDown = true;
 	});
-	$(document).mouseup(function(e) {
-		var dx = e.clientX - prev[0];
-		var dy = e.clientY - prev[1];
-		var angle = Math.atan2(dy, dx);
-		
-		balls[0].dx += Math.min(normalize([dx, dy]) / 100, MAX_CUE_BALL_VEL) * Math.cos(angle);
-		balls[0].dy += Math.min(normalize([dx, dy]) / 100, MAX_CUE_BALL_VEL) * Math.sin(angle);
+	$(document).mousemove(function (e) { 
+		mouseLocation = [e.clientX, e.clientY];
+	});
+	$(document).mouseup(function (e) {
+		mouseDown = false;
+		var shootingDelta = calculateShootingDelta([e.clientX, e.clientY]);
+		balls[0].dx += shootingDelta[0];
+		balls[0].dy += shootingDelta[1];
 	});
 });
 setInterval(update, TIME_BETWEEN_FRAMES);
