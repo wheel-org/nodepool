@@ -12,6 +12,9 @@ var TABLE_HOLE_OFFSET = TABLE_WOOD_WIDTH;
 var BALL_DRAW_RADIUS = PHYSICAL_SCALE *			BALL_RADIUS;
 var TABLE_CIRCLE_MARKER = PHYSICAL_SCALE * 1;
 
+var DRAW_BARRIER = false;
+var DRAW_NORMALS = false;
+
 $(document).ready(function () {
 	canvas = $("canvas")[0];
 	context = canvas.getContext("2d");
@@ -80,15 +83,29 @@ function drawTableAndBalls() {
 			table_y + table_wood_and_cushion + ball.y * PHYSICAL_SCALE - BALL_DRAW_RADIUS, BALL_DRAW_RADIUS);
 	}
 	// Colliding Walls
-	for (var i = 0; i < collidingWalls.length; i++) { 
-		var wall = collidingWalls[i];
-		var ox = table_x + table_wood_and_cushion;
-		var oy = table_y + table_wood_and_cushion;
-		context.beginPath();
-		context.moveTo(ox + wall.x1 * PHYSICAL_SCALE, oy + wall.y1 * PHYSICAL_SCALE);
-		context.lineTo(ox + wall.x2 * PHYSICAL_SCALE, oy + wall.y2 * PHYSICAL_SCALE);
-		context.stroke();
-	}
+	if (DRAW_NORMALS || DRAW_BARRIER) {
+		for (var i = 0; i < collidingWalls.length; i++) {
+			var wall = collidingWalls[i];
+			var ox = table_x + table_wood_and_cushion;
+			var oy = table_y + table_wood_and_cushion;
+			if (DRAW_BARRIER) {
+				context.strokeStyle = "#000";
+				context.beginPath();
+				context.moveTo(ox + wall.x1 * PHYSICAL_SCALE, oy + wall.y1 * PHYSICAL_SCALE);
+				context.lineTo(ox + wall.x2 * PHYSICAL_SCALE, oy + wall.y2 * PHYSICAL_SCALE);
+				context.stroke();
+			}	
+			if (DRAW_NORMALS) {
+				context.strokeStyle = "#FFF";
+				var lineMidX = ((ox + wall.x1 * PHYSICAL_SCALE) + (ox + wall.x2 * PHYSICAL_SCALE)) / 2;
+				var lineMidY = ((oy + wall.y1 * PHYSICAL_SCALE) + (oy + wall.y2 * PHYSICAL_SCALE)) / 2;
+				context.beginPath();
+				context.moveTo(lineMidX, lineMidY);
+				context.lineTo(lineMidX + wall.nx, lineMidY + wall.ny);
+				context.stroke();
+			}
+		}
+	}	
 }
 
 function draw() { 

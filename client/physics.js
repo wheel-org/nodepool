@@ -53,7 +53,9 @@ function line(x1, y1, x2, y2) {
 		x1: x1,
 		y1: y1,
 		x2: x2,
-		y2: y2
+		y2: y2,
+		nx:  - (y2 - y1),
+		ny: x2 - x1
 	};
 }
 function ball(x, y, color) { 
@@ -132,6 +134,31 @@ function subVec(a, b) {
 	return [a[0] - b[0], a[1] - b[1]];
 }
 
+function multVec(a, b) { 
+	return [a * b[0], a * b[1]];
+}
+
+function normalize(v) { 
+	return Math.sqrt(Math.pow(v[0], 2) + Math.pow(v[1], 2));
+}
+
+function normalizeBalls(a, b) { 
+	// Ensures the two balls that are touching are exactly touching
+	var touchingBy = a.r + b.r - length(a, b);
+	if (touchingBy != 0) { 
+		// Needs to be Normalized
+		var eachMoveBy = touchingBy / 2;
+		var v = subVec([a.x, a.y], [b.x, b.y]);
+		var u = multVec(1 / normalize(v), v);
+		// a moves in positive
+		var slope = (a.y - b.y) / (a.x - b.x);
+		a.x += eachMoveBy * u[0];
+		a.y += eachMoveBy * u[1];
+		b.x -= eachMoveBy * u[0];
+		b.y -= eachMoveBy * u[1];
+	}
+}
+
 function updateBalls() { 
 	for (var i = 0; i < balls.length; i++) {
 		simulateVelocityFrame(balls[i]);
@@ -141,6 +168,7 @@ function updateBalls() {
 			var a = balls[i];
 			var b = balls[j];
 			if (areBallsTouching(a, b)) {
+				normalizeBalls(a, b);
 				var coefA = ((2 * b.mass) / (a.mass + b.mass)) *
 					(dotProduct(subVec([a.dx, a.dy], [b.dx, b.dy]), subVec([a.x, a.y], [b.x, b.y])) / 
 						dotProduct(subVec([a.x, a.y], [b.x, b.y]), subVec([a.x, a.y], [b.x, b.y])));
@@ -161,12 +189,14 @@ function updateBalls() {
 		}
 
 		for (var j = 0; j < collidingWalls.length; j++) {
+			var v = [balls[i].dx, balls[i].dy];
+			var n = [collidingWalls[j].nx, collidingWalls[j].ny];
 			if (isBallTouchingWall(balls[i], collidingWalls[j])) {
-				var lenx = collidingWalls[j].x2 - collidingWalls[j].x1;
-				var leny = collidingWalls[j].y2 - collidingWalls[j].y1;
-				var angle = Math.atan2(leny, lenx);
-				balls[i].dx *= -0.9;
-				balls[i].dy *= -0.9;
+				var u = multVec(dotProduct(v, n) / dotProduct(n, n), n);
+				var w = subVec(v, u);
+				balls[i].dx = w[0] - u[0];
+				balls[i].dy = w[1] - u[1];
+				simulateVelocityFrame(balls[i]);
 			}
 		}
 	}
