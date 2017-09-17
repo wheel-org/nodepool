@@ -2,35 +2,21 @@ var canvas, context, screenWidth, screenHeight;
 var PHYSICAL_SCALE = 4;
 
 /* Can't figure out how to auto scale these by PHYSICAL SCALE */ 
-var TABLE_WIDTH = PHYSICAL_SCALE * 			228;
-var TABLE_HEIGHT = PHYSICAL_SCALE * 		128;
+var TABLE_WIDTH = PHYSICAL_SCALE * 			230;
+var TABLE_HEIGHT = PHYSICAL_SCALE * 		130;
 var TABLE_RADIUS = PHYSICAL_SCALE * 		5;
 var TABLE_WOOD_WIDTH = PHYSICAL_SCALE * 	10;
 var TABLE_CUSHION_WIDTH = PHYSICAL_SCALE * 	5;
 var TABLE_HOLE_RADIUS = PHYSICAL_SCALE * 	5.3;
 var TABLE_HOLE_OFFSET = TABLE_WOOD_WIDTH;
-var BALL_RADIUS = PHYSICAL_SCALE *			2.8575;
+var BALL_DRAW_RADIUS = PHYSICAL_SCALE *			BALL_RADIUS;
 var TABLE_CIRCLE_MARKER = PHYSICAL_SCALE * 1;
-
-// 0 is White Ball
-var balls = [
-	ball(50, 51.5, "#FFF"),
-	/* Add other balls + Positions here */
-];
 
 $(document).ready(function () {
 	canvas = $("canvas")[0];
 	context = canvas.getContext("2d");
 	setInterval(draw, 16.6666666);
 });
-
-function ball(x, y, color) { 
-	return {
-		x: x,
-		y: y,
-		color: color
-	};
-}
 
 function createGradient(x, y, width, height, color1, color2) { 
 	var grd = context.createLinearGradient(x, y, width, height);
@@ -89,9 +75,19 @@ function drawTableAndBalls() {
 	drawCircle(table_x + TABLE_CUSHION_WIDTH + 3 * TABLE_WIDTH / 4, table_y + (TABLE_HEIGHT / 2), TABLE_CIRCLE_MARKER);
 	for (var i = 0; i < balls.length; i++) { 
 		var ball = balls[i];
-		context.strokeStyle = ball.color;
-		drawCircle(table_x + table_wood_and_cushion + ball.x * PHYSICAL_SCALE - BALL_RADIUS,
-			table_y + table_wood_and_cushion + ball.y * PHYSICAL_SCALE - BALL_RADIUS, BALL_RADIUS);
+		context.fillStyle = ball.color;
+		drawCircle(table_x + table_wood_and_cushion + ball.x * PHYSICAL_SCALE - BALL_DRAW_RADIUS,
+			table_y + table_wood_and_cushion + ball.y * PHYSICAL_SCALE - BALL_DRAW_RADIUS, BALL_DRAW_RADIUS);
+	}
+	// Colliding Walls
+	for (var i = 0; i < collidingWalls.length; i++) { 
+		var wall = collidingWalls[i];
+		var ox = table_x + table_wood_and_cushion;
+		var oy = table_y + table_wood_and_cushion;
+		context.beginPath();
+		context.moveTo(ox + wall.x1 * PHYSICAL_SCALE, oy + wall.y1 * PHYSICAL_SCALE);
+		context.lineTo(ox + wall.x2 * PHYSICAL_SCALE, oy + wall.y2 * PHYSICAL_SCALE);
+		context.stroke();
 	}
 }
 
