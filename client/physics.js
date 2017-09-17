@@ -1,7 +1,7 @@
 var TIME_BETWEEN_FRAMES = 16.6666666;
 var DELTA_TIME = 1000 / TIME_BETWEEN_FRAMES;
 var DRAG = 0.985;
-var x = 2.8575;
+var BALL_RADIUS = 2.8575;
 
 // 0 is White Ball
 var balls = [

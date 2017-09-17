@@ -4,15 +4,28 @@
     <meta charset="utf8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>Node Pool</title>
-    <link rel="stylesheet" href="main.css"/>
+	<link rel="stylesheet" href="main.css" />
+	<link rel="stylesheet" href="animate.css" />
+	<link href="https://fonts.googleapis.com/css?family=Merriweather" rel="stylesheet" />
 </head>
 <body>
+	<div class="overlay">
+		<div class="modal">
+			<div class="content">
+				<h1>Welcome to Node-Pool</h1>
+				<h2>Enter your name</h2>
+				<input type="text" name="username">
+				<button><b>Proceed</b></button>
+			</div>
+		</div>
+	</div>
 	<canvas>
 
 	</canvas>
 	<script type="text/javascript" src="roundedRectangle.js"></script>
+	
 	<script type="text/javascript" src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
-	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>	
 	<script type="text/javascript" src="physics.js"></script>
 	<script type="text/javascript" src="graphics.js"></script>
 </body>

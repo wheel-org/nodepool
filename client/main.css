@@ -1,14 +1,58 @@
-* { 
+body, html { 
+	height:100%;
+	font-family: 'Merriweather', serif;
 	margin: 0; 
 	padding: 0;
 }
 
-body, html { 
-	height:100%;
+.overlay {
+	background: rgba(0, 0, 0, 0.5);
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	z-index: 10;
+}	
+
+.modal {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 800px;
+	height: 400px;
+	background: #DDD;
+	border-radius: 30px;
+	padding: 30px;
+	text-align: center;
+}
+
+.content {
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	position: absolute;
 }
 
 canvas {
     position:absolute;
     width:100%;
     height:100%;
+}
+
+input, button {
+    border: 5px solid white; 
+    -webkit-box-shadow: 
+      inset 0 0 8px  rgba(0,0,0,0.1),
+            0 0 16px rgba(0,0,0,0.1); 
+    -moz-box-shadow: 
+      inset 0 0 8px  rgba(0,0,0,0.1),
+            0 0 16px rgba(0,0,0,0.1); 
+    box-shadow: 
+      inset 0 0 8px  rgba(0,0,0,0.1),
+            0 0 16px rgba(0,0,0,0.1); 
+    padding: 15px;
+    background: rgba(255,255,255,0.5);
+    margin: 0 0 10px 0;
 }
