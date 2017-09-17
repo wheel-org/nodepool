@@ -16,6 +16,10 @@ var rooms = [{
 	id: 0,
 	players: [1, 2],
 	spectators: [1, 2, 3, 4, 5]
+},{
+	id: 1,
+	players: [1],
+	spectators: []
 }];
 /*
 room object: {
@@ -45,17 +49,21 @@ io.on('connection', function(socket) {
 
 	socket.on('createRoom', function() {
 		var roomId = generateRoomId();
+		console.log("Creating room " + roomId + ": " + currPlayer.name);
 		rooms[roomId] = {
+			id: roomId,
 			players: [currPlayer.id],
 			spectators: []
 		};
 
+		currPlayer.room = roomId;
 		currPlayer.state = 1;
 		socket.join('room-' + roomId);
-		socket.emit('room-created', roomId);
+		socket.emit('room-created', rooms[roomId]);
 	});
 
 	socket.on('joinRoom', function(roomId) {
+		console.log("Joining room " + roomId + ": " + currPlayer.name);
 		if (rooms[roomId]) {
 			if (rooms[roomId].players < MAX_PLAYERS) {
 				rooms[roomId].players.push(currPlayer.id);
@@ -67,31 +75,39 @@ io.on('connection', function(socket) {
 			}
 		}
 		else {
-			socket.emit('error', 'Room does not exist');
+			socket.emit('errorMsg', 'Room does not exist');
 		}
 	});
 
 	socket.on('leaveRoom', function() {
+		console.log("Leaving room " + currPlayer.room + ": " + currPlayer.name);
 		if (currPlayer.room > -1) {
 			socket.leave('room-' + currPlayer.room);
 			var index = rooms[currPlayer.room].players.indexOf(currPlayer.id);
 			if (index > -1) {
 				rooms[currPlayer.room].players.splice(index, 1);
+				if (rooms[currPlayer.room].players.length <= 0) {
+					delete rooms[currPlayer.room];
+				}
 			}
 			currPlayer.room = -1;
 			socket.emit('lobby', getAvailableRooms());
 		}
 		else {
-			socket.emit('error', 'Player is not in room');
+			socket.emit('errorMsg', 'Player is not in room');
 		}
 	});
 
 	socket.on('disconnect', function() {
+		console.log("Player disconnect: " + currPlayer.name);
 		if (currPlayer.room > -1) {
 			socket.leave('room-' + currPlayer.room);
 			var index = rooms[currPlayer.room].players.indexOf(currPlayer.id);
 			if (index > -1) {
 				rooms[currPlayer.room].players.splice(index, 1);
+				if (rooms[currPlayer.room].players.length <= 0) {
+					delete rooms[currPlayer.room];
+				}
 			}
 			currPlayer.room = -1;
 		}
@@ -100,17 +116,18 @@ io.on('connection', function(socket) {
 });
 
 function generateRoomId() {
-	var newId = Math.random() % 1000;
-	while (rooms[newId]) newId = Math.random() % 1000;
+	var newId = (Math.random() * 1000) | 0;
+	while (rooms[newId]) newId = (Math.random() * 1000) | 0;
 	return newId;
 }
 
 function getAvailableRooms() {
-	return rooms.map(function(r) {
-		return {
+	return rooms.reduce(function(acc, r) {
+		acc.push({
 			id: r.id,
 			numPlayers: r.players.length,
 			numSpecs: r.spectators.length
-		}
-	});
+		});
+		return acc;
+	}, []);
 }

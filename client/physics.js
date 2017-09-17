@@ -45,24 +45,24 @@ var balls = [
 ];
 
 var collidingWalls = [
-	line(0, 94, 0, 6),
-	line(0, 6, -10, -3),
-	line(-3, -10, 6, 0),
-	line(6, 0, 94, 0),
-	line(94, 0, 95, -6),
-	line(105, -6, 106, 0),
-	line(106, 0, 194, 0),
-	line(194, 0, 203, -10),
-	line(210, -3, 200, 6),
-	line(200, 6, 200, 94),
-	line(200, 94, 210, 103),
-	line(203, 110, 194, 100),
-	line(194, 100, 106, 100),
-	line(106, 100, 105, 106),
-	line(95, 106, 94, 100),
-	line(94, 100, 6, 100),
-	line(6, 100, -3, 110),
-	line(-10, 103, 0, 94)
+	line(0, 91, 0, 9),
+	line(0, 9, -10, -3),
+	line(-3, -10, 9, 0),
+	line(9, 0, 93, 0),
+	line(93, 0, 95, -6),
+	line(105, -6, 107, 0),
+	line(107, 0, 191, 0),
+	line(191, 0, 203, -10),
+	line(210, -3, 200, 9),
+	line(200, 9, 200, 91),
+	line(200, 91, 210, 103),
+	line(203, 110, 191, 100),
+	line(191, 100, 107, 100),
+	line(107, 100, 105, 106),
+	line(95, 106, 93, 100),
+	line(93, 100, 9, 100),
+	line(9, 100, -3, 110),
+	line(-10, 103, 0, 91)
 ];
 
 function line(x1, y1, x2, y2) { 
@@ -137,11 +137,11 @@ function simulateVelocityFrame(ball) {
 	ball.x += (ball.dx * 100) / DELTA_TIME;	
 	ball.y += (ball.dy * 100) / DELTA_TIME;
 
-	if (ball.x < BALL_RADIUS) ball.x = BALL_RADIUS;
+	if (ball.x < -10) ball.x = -10;
 	else if (ball.x > 210) ball.x = 210;
 
-	if (ball.y < BALL_RADIUS) ball.y = BALL_RADIUS;
-	else if (ball.y > 130 - BALL_RADIUS) ball.y = 130 - BALL_RADIUS;
+	if (ball.y < -10) ball.y = -10;
+	else if (ball.y > 110) ball.y = 110;
 }
 
 function dotProduct(a, b) { 

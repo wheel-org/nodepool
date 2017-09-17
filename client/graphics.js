@@ -14,7 +14,7 @@ var BALL_DRAW_RADIUS = PHYSICAL_SCALE *			BALL_RADIUS;
 var TABLE_CIRCLE_MARKER = PHYSICAL_SCALE * 1;
 
 var DRAW_BARRIER = true;
-var DRAW_NORMALS = true;
+var DRAW_NORMALS = false;
 
 $(document).ready(function () {
 	canvas = $("canvas")[0];
@@ -107,7 +107,6 @@ function drawTableAndBalls() {
 			context.strokeStyle = "#FFF";
 			context.beginPath();
 			context.moveTo(drawX, drawY);
-			console.log(shootingDelta);
 			context.lineTo(drawX + (shootingDelta[0] * 100), drawY + (shootingDelta[1] * 100));
 			context.stroke();
 			context.strokeStyle = "#000";
