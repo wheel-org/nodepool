@@ -15,11 +15,13 @@ var sockets = {};
 var rooms = [{
 	id: 0,
 	players: [1, 2],
-	spectators: [1, 2, 3, 4, 5]
+	spectators: [1, 2, 3, 4, 5],
+	turn: -1
 },{
 	id: 1,
 	players: [1],
-	spectators: []
+	spectators: [],
+	turn: -1
 }];
 /*
 room object: {
@@ -43,7 +45,6 @@ io.on('connection', function(socket) {
 		currPlayer.state = 0;
 		sockets[currPlayer.id] = socket;
 
-
 		socket.emit('lobby', getAvailableRooms());
 	});
 
@@ -65,6 +66,8 @@ io.on('connection', function(socket) {
 	socket.on('joinRoom', function(roomId) {
 		console.log("Joining room " + roomId + ": " + currPlayer.name);
 		if (rooms[roomId]) {
+			currPlayer.room = roomId;
+			currPlayer.state = 1;
 			if (rooms[roomId].players < MAX_PLAYERS) {
 				rooms[roomId].players.push(currPlayer.id);
 				socket.emit('joined-player', rooms[roomId]);
@@ -77,6 +80,19 @@ io.on('connection', function(socket) {
 		else {
 			socket.emit('errorMsg', 'Room does not exist');
 		}
+	});
+
+	socket.on('startGame', function() {
+		if (rooms[currPlayer.room].players.length === 2) {
+
+		}
+		else {
+			socket.emit('errorMsg', 'Not enough players in room');
+		}
+	});
+
+	socket.on('sendShot', function(shotx, shoty) {
+
 	});
 
 	socket.on('leaveRoom', function() {
