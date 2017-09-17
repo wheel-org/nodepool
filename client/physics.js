@@ -1,7 +1,9 @@
 var TIME_BETWEEN_FRAMES = 1;
 var DELTA_TIME = 1000 / TIME_BETWEEN_FRAMES;
+var PREV_TIME = Date.now();
 var DRAG = 0.995;
 var BALL_RADIUS = 2.8575;
+var MAX_CUE_BALL_VEL = 5;
 
 // 0 is White Ball
 var balls = [
@@ -95,12 +97,12 @@ function isBallTouchingWall(ball, wall) {
 	var a = dotProduct(d, d);
 	var b = 2 * dotProduct(f, d);
 	var c = dotProduct(f, f) - BALL_RADIUS * BALL_RADIUS;
-	var dis = b*b - 4*a*c;
+	var dis = b * b - 4 * a * c;
 
 	if (dis >= 0) {
 		dis = Math.sqrt(dis);
-		var t1 = (-b - dis) / (2*a);
-		var t2 = (-b + dis) / (2*a);
+		var t1 = (-b - dis) / (2 * a);
+		var t2 = (-b + dis) / (2 * a);
 
 		if (t1 >= 0 && t1 <= 1) {
 			return true;
@@ -159,6 +161,10 @@ function normalizeBalls(a, b) {
 	}
 }
 
+function normalizeBallAndWall(b, l) { 
+
+}
+
 function updateBalls() { 
 	for (var i = 0; i < balls.length; i++) {
 		simulateVelocityFrame(balls[i]);
@@ -203,7 +209,10 @@ function updateBalls() {
 }
 
 function update() { 
+	var now = Date.now();
+	DELTA_TIME = 1000 / (now - PREV_TIME);
 	updateBalls();
+	PREV_TIME = now;
 }
 
 $(document).ready(function () {
@@ -215,8 +224,9 @@ $(document).ready(function () {
 		var dx = e.clientX - prev[0];
 		var dy = e.clientY - prev[1];
 		var angle = Math.atan2(dy, dx);
-		balls[0].dx += 10 * Math.cos(angle);
-		balls[0].dy += 10 * Math.sin(angle);
+		
+		balls[0].dx += Math.min(normalize([dx, dy]) / 100, MAX_CUE_BALL_VEL) * Math.cos(angle);
+		balls[0].dy += Math.min(normalize([dx, dy]) / 100, MAX_CUE_BALL_VEL) * Math.sin(angle);
 	});
 });
 setInterval(update, TIME_BETWEEN_FRAMES);
