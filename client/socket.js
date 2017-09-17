@@ -17,6 +17,7 @@ function setupSocket() {
 		startMenu.hide();
 
 		var roomlist = $(".lobby");
+		roomlist.show();
 		for(var i = 0; i < rooms.length; i++) {
 			var room = rooms[i];
 
@@ -38,10 +39,28 @@ function setupSocket() {
 	});
 
 	socket.on("joined-player", function(room) {
+		$(".lobby").hide();
+
+		var playerList = room.players.reduce(function(acc, curr) {
+			return "<li>" + curr + "</li>";
+		}, "");
+
+		var spectatorList = room.players.reduce(function(acc, curr) {
+			return "<li>" + curr + "</li>";
+		}, "");
+
+		$(".room").html(`
+			<p>Id: ${room.id}</p>
+			<p>Players</p>
+			<ul>${playerList}</ul>
+			<p>Spectators</p>
+			<ul>${spectatorList}</ul>
+		`);
 		console.log(room);
 	});
 
 	socket.on("joined-spec", function(room) {
-		console.log(room);
-	})
+		$(".overlay").hide();
+		// Start rendering
+	});
 }

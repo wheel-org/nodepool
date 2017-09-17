@@ -57,11 +57,13 @@ io.on('connection', function(socket) {
 
 	socket.on('joinRoom', function(roomId) {
 		if (rooms[roomId]) {
-			if (rooms[roomId].players >= MAX_PLAYERS) {
-				socket.emit('joined-spec', rooms[roomId])
+			if (rooms[roomId].players < MAX_PLAYERS) {
+				rooms[roomId].players.push(currPlayer.id);
+				socket.emit('joined-player', rooms[roomId]);
 			}
 			else {
-				socket.emit('joined-player', rooms[roomId]);
+				rooms[roomId].spectators.push(currPlayer.id);
+				socket.emit('joined-spec', rooms[roomId]);
 			}
 		}
 		else {

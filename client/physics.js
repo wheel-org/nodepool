@@ -177,9 +177,16 @@ function update() {
 }
 
 $(document).ready(function () {
-	$(document).click(function () { 
-
-		balls[0].dx += 10;
+	var prev;
+	$(document).mousedown(function(e) {
+		prev = [e.clientX, e.clientY];
+	});
+	$(document).mouseup(function(e) {
+		var dx = e.clientX - prev[0];
+		var dy = e.clientY - prev[1];
+		var angle = Math.atan2(dy, dx);
+		balls[0].dx += 10 * Math.cos(angle);
+		balls[0].dy += 10 * Math.sin(angle);
 	});
 });
 setInterval(update, TIME_BETWEEN_FRAMES);

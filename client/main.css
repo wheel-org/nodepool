@@ -57,6 +57,14 @@ input, button {
     margin: 0 0 10px 0;
 }
 
+.lobby {
+	display: none;
+}
+
+.room {
+	display: none;
+}
+
 .room-btn {
 	border: 1px solid black;
 }
