@@ -70,11 +70,15 @@ io.on('connection', function(socket) {
 			currPlayer.state = 1;
 			if (rooms[roomId].players < MAX_PLAYERS) {
 				rooms[roomId].players.push(currPlayer.id);
-				socket.emit('joined-player', rooms[roomId]);
+				var playerStatus = 0; // Player 1
+				if (rooms[roomId].players == MAX_PLAYERS) { 
+					playerStatus++; // Player 2
+				}
+				socket.emit('joined-player', rooms[roomId], playerStatus);
 			}
 			else {
 				rooms[roomId].spectators.push(currPlayer.id);
-				socket.emit('joined-spec', rooms[roomId]);
+				socket.emit('joined-spec', rooms[roomId], 2);
 			}
 		}
 		else {
@@ -84,15 +88,21 @@ io.on('connection', function(socket) {
 
 	socket.on('startGame', function() {
 		if (rooms[currPlayer.room].players.length === 2) {
-
+			
 		}
 		else {
 			socket.emit('errorMsg', 'Not enough players in room');
 		}
 	});
 
-	socket.on('sendShot', function(shotx, shoty) {
-
+	socket.on('sendShot', function (cueDx, cueDy) {
+		for (var i = 0; i < rooms[currPlayer.room].players.length; i++) { 
+			// Handle Turn Changing etc
+			sockets[rooms[currPlayer.room].players[i]].emit("sendShot", cueDx, cueDy);
+		}
+		for (var i = 0; i < rooms[currPlayer.room].spectators.length; i++) { 
+			sockets[rooms[currPlayer.room].spectators[i]].emit("sendShot", cueDx, cueDy);
+		}
 	});
 
 	socket.on('leaveRoom', function() {

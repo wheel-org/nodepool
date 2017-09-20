@@ -94,7 +94,7 @@ function drawTableAndBalls() {
 			var gradient = context.createLinearGradient(drawX - BALL_DRAW_RADIUS, drawY, drawX + BALL_DRAW_RADIUS, drawY);
 			gradient.addColorStop("0", ball.color);
 			gradient.addColorStop("0.35", ball.color);
-			gradient.addColorStop("0.5", "#DDD");
+			gradient.addColorStop("0.5", "#EEE");
 			gradient.addColorStop("0.65", ball.color);
 			gradient.addColorStop("1.0", ball.color);
 			context.fillStyle = gradient;

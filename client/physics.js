@@ -30,7 +30,7 @@ var balls = [
 	ball(163.5, 44.5, COLOR_GREEN, 6), // Surrounding Third Row
 	ball(163.5, 58.5, COLOR_GREEN, 14),  
 
-	ball(169, 41, COLOR_YELLOW, 2),
+	ball(169, 41, COLOR_YELLOW, 9),
 	ball(169, 48, COLOR_PURPLE, 4), // Fourth Row
 	ball(169, 55, COLOR_MAROON, 15),  
 	ball(169, 62, COLOR_ORANGE, 13),
@@ -248,10 +248,17 @@ $(document).ready(function () {
 		mouseLocation = [e.clientX, e.clientY];
 	});
 	$(document).mouseup(function (e) {
-		mouseDown = false;
-		var shootingDelta = calculateShootingDelta([e.clientX, e.clientY]);
-		balls[0].dx += shootingDelta[0];
-		balls[0].dy += shootingDelta[1];
+		if (playerStatus != -1) {
+			mouseDown = false;
+			var shootingDelta = calculateShootingDelta([e.clientX, e.clientY]);
+			shootBall(shootingDelta[0], shootingDelta[1]);
+		}	
 	});
 });
+
+function ballHasBeenShot(cueDx, cueDy) { 
+	balls[0].dx = cueDx;
+	balls[0].dy = cueDy
+}
+
 setInterval(update, TIME_BETWEEN_FRAMES);
