@@ -240,15 +240,19 @@ function calculateShootingDelta(mouseLoc) {
 }
 
 $(document).ready(function () {
-	$(document).mousedown(function(e) {
-		mouseDownLocation = [e.clientX, e.clientY];
-		mouseDown = true;
+	$(document).mousedown(function (e) {
+		if (isPlayer() && inGame) {
+			mouseDownLocation = [e.clientX, e.clientY];
+			mouseDown = true;
+		}
 	});
 	$(document).mousemove(function (e) { 
-		mouseLocation = [e.clientX, e.clientY];
+		if (isPlayer() && inGame) {
+			mouseLocation = [e.clientX, e.clientY];
+		}	
 	});
 	$(document).mouseup(function (e) {
-		if (playerStatus != -1) {
+		if (isPlayer() && inGame) {
 			mouseDown = false;
 			var shootingDelta = calculateShootingDelta([e.clientX, e.clientY]);
 			shootBall(shootingDelta[0], shootingDelta[1]);

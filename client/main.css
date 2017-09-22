@@ -1,5 +1,12 @@
 * {
 	font-family: 'Merriweather', serif;
+	-webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
 }
 body, html { 
 	height:100%;
@@ -88,9 +95,40 @@ textarea {
 	z-index: 5;
 }
 .gameUI .title {
-	position: absolute; width: 100%; text-align:center; top: 0
+	position: absolute;
+	width: 100%; 
+	text-align:center; 
+	top: 0;
 }
 
 .gameUI .playerStatus {
 	padding: 20px;
+}
+
+.gameUI .leaveRoom {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin-right: 20px;
+	margin-top: 20px;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+tr {
+	border: 1px solid black;
+	
+}
+
+td, th {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+tr:hover {
+	cursor: pointer;
+	background: #CCC;
 }

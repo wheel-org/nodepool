@@ -7,20 +7,29 @@
 	<link rel="stylesheet" href="main.css" />
 	<link rel="stylesheet" href="animate.css" />
 	<link href="https://fonts.googleapis.com/css?family=Merriweather" rel="stylesheet" />
+	
 </head>
 <body>
 	<div class="overlay">
 		<div class="modal">
-			<div class="content">
+			<div class="welcome">
 				<h1>Welcome to Node-Pool</h1>
 				<h2>Enter your name</h2>
-				<input type="text" name="username" id="name-input">
-				<button id="start-btn"><b>Proceed</b></button>
+				<input type="text" name="username" id="nameInput">
+				<button id="startBtn"><b>Proceed</b></button>
 			</div>
 			<div class="lobby">
-				<button id="create-room">Create Room</button>
+				<button id="createRoom">Create Room</button>
+				<table id="lobbyRoomList">
+				</table>
 			</div>
-			<div class="room"></div>
+			<div class="room">
+				<div class="roomInfo">
+
+				</div>
+				<button class="startGame">Start Game</button>
+				<button class="leaveRoom">Leave Room</button>
+			</div>
 		</div>
 	</div>
 	<div class="gameUI">
@@ -29,8 +38,9 @@
 		</div>
 		<div class="playerStatus">
 			<h4>You are Spectating</h4>
-			<textarea id="log" disabled></textarea>
+			<textarea class="log" disabled></textarea>
 		</div>
+		<button class="leaveRoom">Leave Room</button>
 	</div>
 	<canvas id="canvas">
 	</canvas>

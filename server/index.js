@@ -39,16 +39,16 @@ io.on('connection', function(socket) {
 		state: -1 // -1: N/A, 0: lobby, 1: room, 2: game player 1, 3: game player 2, 4: game spectator
 	};
 
-	socket.on('start', function(name) {
+	socket.on('server.start', function(name) {
 		console.log("New player: " + name);
 		currPlayer.name = name;
 		currPlayer.state = 0;
 		sockets[currPlayer.id] = socket;
 
-		socket.emit('lobby', getAvailableRooms());
+		socket.emit('client.lobby', getAvailableRooms());
 	});
 
-	socket.on('createRoom', function() {
+	socket.on('server.createRoom', function() {
 		var roomId = generateRoomId();
 		console.log("Creating room " + roomId + ": " + currPlayer.name);
 		rooms[roomId] = {
@@ -60,10 +60,10 @@ io.on('connection', function(socket) {
 		currPlayer.room = roomId;
 		currPlayer.state = 1;
 		socket.join('room-' + roomId);
-		socket.emit('room-created', rooms[roomId]);
+		socket.emit('client.roomCreated', rooms[roomId]);
 	});
 
-	socket.on('joinRoom', function(roomId) {
+	socket.on('server.joinRoom', function(roomId) {
 		console.log("Joining room " + roomId + ": " + currPlayer.name);
 		if (rooms[roomId]) {
 			currPlayer.room = roomId;
@@ -74,53 +74,46 @@ io.on('connection', function(socket) {
 				if (rooms[roomId].players == MAX_PLAYERS) { 
 					playerStatus++; // Player 2
 				}
-				socket.emit('joined-player', rooms[roomId], playerStatus);
+				socket.emit('client.joinedPlayer', rooms[roomId], playerStatus);
 			}
 			else {
 				rooms[roomId].spectators.push(currPlayer.id);
-				socket.emit('joined-spec', rooms[roomId], 2);
+				socket.emit('client.joinedSpec', rooms[roomId], 2);
 			}
 		}
 		else {
-			socket.emit('errorMsg', 'Room does not exist');
+			socket.emit('client.errorMsg', 'Room does not exist');
 		}
 	});
 
-	socket.on('startGame', function() {
+	socket.on('server.startGame', function() {
 		if (rooms[currPlayer.room].players.length === 2) {
 			
 		}
 		else {
-			socket.emit('errorMsg', 'Not enough players in room');
+			socket.emit('client.errorMsg', 'Not enough players in room');
 		}
 	});
 
-	socket.on('sendShot', function (cueDx, cueDy) {
+	socket.on('server.sendShot', function (cueDx, cueDy) {
 		for (var i = 0; i < rooms[currPlayer.room].players.length; i++) { 
 			// Handle Turn Changing etc
-			sockets[rooms[currPlayer.room].players[i]].emit("sendShot", cueDx, cueDy);
-		}
+			sockets[rooms[currPlayer.room].players[i]].emit("client.receiveShot", cueDx, cueDy);
+		}	
 		for (var i = 0; i < rooms[currPlayer.room].spectators.length; i++) { 
-			sockets[rooms[currPlayer.room].spectators[i]].emit("sendShot", cueDx, cueDy);
+			sockets[rooms[currPlayer.room].spectators[i]].emit("client.receiveShot", cueDx, cueDy);
 		}
 	});
 
-	socket.on('leaveRoom', function() {
+	socket.on('server.leaveRoom', function() {
 		console.log("Leaving room " + currPlayer.room + ": " + currPlayer.name);
 		if (currPlayer.room > -1) {
 			socket.leave('room-' + currPlayer.room);
-			var index = rooms[currPlayer.room].players.indexOf(currPlayer.id);
-			if (index > -1) {
-				rooms[currPlayer.room].players.splice(index, 1);
-				if (rooms[currPlayer.room].players.length <= 0) {
-					delete rooms[currPlayer.room];
-				}
-			}
-			currPlayer.room = -1;
-			socket.emit('lobby', getAvailableRooms());
+			playerLeaveRoom(currPlayer);
+			socket.emit('client.lobby', getAvailableRooms());
 		}
 		else {
-			socket.emit('errorMsg', 'Player is not in room');
+			socket.emit('client.errorMsg', 'Player is not in room');
 		}
 	});
 
@@ -156,4 +149,20 @@ function getAvailableRooms() {
 		});
 		return acc;
 	}, []);
+}
+
+function playerLeaveRoom(currPlayer) { 
+	var playerIndex = rooms[currPlayer.room].players.indexOf(currPlayer.id);
+	var spectatorIndex = rooms[currPlayer.room].spectators.indexOf(currPlayer.id);
+	if (playerIndex > -1) {
+		rooms[currPlayer.room].players.splice(playerIndex, 1);
+	}
+	else { 
+		rooms[currPlayer.room].spectators.splice(spectatorIndex, 1);
+	}
+	if (rooms[currPlayer.room].players.length +
+		rooms[currPlayer.room].spectators.length <= 0) { 
+		delete rooms[currPlayer.room];
+	}
+	currPlayer.room = -1;
 }

@@ -1,129 +1,161 @@
 var socket;
 
-var enterBtn = document.getElementById("start-btn");
-var nameInput = document.getElementById("name-input");
-var createBtn = document.getElementById("create-room");
-var consoleTextarea = document.getElementById("log");
-
 var playerStatus = -1; // -1 is NA, 0 is P1, 1 is P2, 2 is spec
-var showingGame = false;
+var inGame = false;
+var currentTurn = -1;
 
-enterBtn.onclick = function() {
-	var name = nameInput.value;
+showWelcome();
 
+$("#startBtn").click(function() {
+	var name = $("#nameInput").val();
 	socket = io();
 	setupSocket();
-	socket.emit("start", name);
+	socket.emit("server.start", name);
+});
+
+$("#createRoom").onclick = function() {
+	socket.emit("server.createRoom");
 };
 
-createBtn.onclick = function() {
-	socket.emit("createRoom");
-};
+$(".startGame").click(function () {
+	socket.emit("server.startGame");
+});
+
+$(".leaveRoom").click(function () {
+	socket.emit("server.leaveRoom");
+});
+
+function showOverlay() { 
+	inGame = false;
+	$(".overlay").show();
+}
+function hideAll() { 
+	$(".lobby").hide();
+	$(".room").hide();
+	$(".overlay").hide();
+	$(".welcome").hide();
+}
+function showWelcome() { 
+	hideAll();
+	showOverlay();
+	$(".welcome").show();
+}
+function showLobby() {
+	hideAll();
+	showOverlay();
+	$(".lobby").show();
+}
+function showRoom() {
+	hideAll();
+	showOverlay();
+	$(".room").show();
+}
 
 function shootBall(cueDx, cueDy) { 
-	socket.emit("sendShot", cueDx, cueDy);
+	socket.emit("server.sendShot", cueDx, cueDy);
 }
 
 function setupSocket() {
 	log("Setting up Connection...");
-	socket.on("lobby", function(rooms) {
-		$(".lobby").show();
-		$(".room").hide();
-
+	socket.on("client.lobby", function (rooms) {
+		showLobby();
 		// Enter lobby, load rooms
-		var startMenu = $(".content");
-		startMenu.hide();
 
-		var roomlist = $(".lobby");
-		roomlist.show();
-		roomlist.html($(createBtn));
+		$("#lobbyRoomList").html(`<tr>
+			<th>ID</th>
+			<th>Players</th>
+			<th>Spectators</th>
+		</tr>`);
 		for(var i = 0; i < rooms.length; i++) {
 			var room = rooms[i];
 
 			var roomBtn = $(`
-				<div class="room-btn">
-					<p>ID: ${room.id}</p>
-					<p>Players: ${room.numPlayers}</p>
-					<p>Spectators: ${room.numSpecs}</p>
-				</div>
+				<tr class="roomBtn" id="${room.id}">
+					<td>${room.id}</td>
+					<td>${room.numPlayers}</td>
+					<td>${room.numSpecs}</td>
+				</tr>
 			`);
 
-			roomBtn.click(function() {
-				var id = this.children[0].innerHTML.slice(4);
-				socket.emit("joinRoom", id);
+			roomBtn.click(function () {
+				socket.emit("server.joinRoom", $(this).attr("id"));
 			});
 
-			roomlist.append(roomBtn);
+			$("#lobbyRoomList").append(roomBtn);
 		}
 	});
 
-	socket.on("joined-player", function(room, newPlayerStatus) {
+	socket.on("client.joinedPlayer", function(room, newPlayerStatus) {
 		loadRoom(room);
 		log("Joined as Player " + (newPlayerStatus + 1));
 		playerStatus = newPlayerStatus;
 		updateState();
 	});
 
-	socket.on("joined-spec", function(room, newPlayerStatus) {
+	socket.on("client.joinedSpec", function(room, newPlayerStatus) {
 		$(".overlay").hide();
 		// Start rendering
 		log("Joined as Spectator");
-		showingGame = true;
+		inGame = true;
 		playerStatus = newPlayerStatus;
 		updateState();
 	});
 
 	// set showingGame to true when starting
 	
-	socket.on("room-created", function(room) {
+	socket.on("client.roomCreated", function(room) {
 		loadRoom(room);
 	});
 
-	socket.on("new-player", function(name) {
+	socket.on("client.newPlayer", function(name) {
 		loadRoom(room)
 	});
 
-	socket.on('sendShot', function (cueDx, cueDy) {
+	socket.on('client.receiveShot', function (cueDx, cueDy) {
 		ballHasBeenShot(cueDx, cueDy);		
+	});
+
+	socket.on('client.errorMsg', function (message) {
+		alert(message);
+	});
+
+	socket.on('client.gameStart', function () {
+
 	});
 }
 
 function loadRoom(room) {
-	$(".lobby").hide();
-	$(".room").show();
-
+	showRoom();
 	var playerList = room.players.reduce(function(acc, curr) {
 		return "<li>" + curr + "</li>";
 	}, "");
 
-	var spectatorList = room.players.reduce(function(acc, curr) {
+	var spectatorList = room.spectators.reduce(function(acc, curr) {
 		return "<li>" + curr + "</li>";
 	}, "");
 
-	var startGameBtn = $('<button id="start-game">Start Game</button>');
-	var leaveBtn = $('<button id="leave-room">Leave Room</button>');
-	startGameBtn.click(function() {
-		socket.emit("startGame");
-	});
-
-	leaveBtn.click(function() {
-		socket.emit("leaveRoom");
-	});
-
-	$(".room").html(`
+	$(".roomInfo").html(`
 		<p>Id: ${room.id}</p>
 		<p>Players</p>
 		<ul>${playerList}</ul>
 		<p>Spectators</p>
 		<ul>${spectatorList}</ul>
-	`).append(startGameBtn).append(leaveBtn);
+	`);
 	
 }
 
 function log(message) { 
-	consoleTextarea.innerHTML += message + "\n";
+	$(".log").append(message + "\n");
 }
 
 function updateState() {
-	$(".playerStatus").html(["You are Player 1", "You are Player 2", "You are Spectating"][playerStatus]);
+	$(".playerStatus h4").html(["You are Player 1", "You are Player 2", "You are Spectating"][playerStatus]);
+}
+
+function isPlayer() { 
+	return playerStatus === 0 || playerStatus === 1;
+}
+
+function isSpectator() { 
+	return playerStatus === 2;
 }
