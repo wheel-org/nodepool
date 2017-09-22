@@ -108,7 +108,8 @@ function setupSocket() {
 	});
 
 	socket.on("client.newPlayer", function(name) {
-		loadRoom(room)
+		log("Player joined: " + name);
+		loadRoom(room);
 	});
 
 	socket.on('client.receiveShot', function (cueDx, cueDy) {

@@ -36,7 +36,8 @@ io.on('connection', function(socket) {
 		id: socket.id,
 		name: "",
 		room: -1,
-		state: -1 // -1: N/A, 0: lobby, 1: room, 2: game player 1, 3: game player 2, 4: game spectator
+		player: -1, // -1: N/A, 0: player 1, 1: player 2, 2: spectator
+		state: -1 // -1: N/A, 0: lobby, 1: room, 2: in game
 	};
 
 	socket.on('server.start', function(name) {
@@ -59,25 +60,30 @@ io.on('connection', function(socket) {
 
 		currPlayer.room = roomId;
 		currPlayer.state = 1;
+		currPlayer.player = 0;
 		socket.join('room-' + roomId);
 		socket.emit('client.roomCreated', rooms[roomId]);
 	});
 
 	socket.on('server.joinRoom', function(roomId) {
-		console.log("Joining room " + roomId + ": " + currPlayer.name);
+		console.log("Joining room " + roomId + ": " + currPlayer.name, rooms[roomId]);
 		if (rooms[roomId]) {
 			currPlayer.room = roomId;
 			currPlayer.state = 1;
+
+			io.to('room-' + roomId).emit('client.newPlayer', currPlayer.name);
+
 			if (rooms[roomId].players < MAX_PLAYERS) {
+				currPlayer.player = rooms[roomId].players.length;
+
 				rooms[roomId].players.push(currPlayer.id);
-				var playerStatus = 0; // Player 1
-				if (rooms[roomId].players == MAX_PLAYERS) { 
-					playerStatus++; // Player 2
-				}
-				socket.emit('client.joinedPlayer', rooms[roomId], playerStatus);
+				socket.join('room-' + roomId);
+				socket.emit('client.joinedPlayer', rooms[roomId], currPlayer.player);
 			}
 			else {
+				currPlayer.player = 2;
 				rooms[roomId].spectators.push(currPlayer.id);
+				socket.join('room-' + roomId);
 				socket.emit('client.joinedSpec', rooms[roomId], 2);
 			}
 		}
@@ -87,21 +93,33 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('server.startGame', function() {
-		if (rooms[currPlayer.room].players.length === 2) {
-			
+		if (rooms[currPlayer.room].players.length === MAX_PLAYERS) {
+			rooms[currPlayer.room].turn = 0;
+			for (var i = 0; i < rooms[currPlayer.room].players.length; i++) {
+				rooms[currPlayer.room].players[i].state = 2;
+			}
+			io.to('room-' + currPlayer.room).emit('client.gameStart');
+			io.to('room-' + currPlayer.room).emit('client.newTurn', 0);
 		}
 		else {
 			socket.emit('client.errorMsg', 'Not enough players in room');
 		}
 	});
 
-	socket.on('server.sendShot', function (cueDx, cueDy) {
-		for (var i = 0; i < rooms[currPlayer.room].players.length; i++) { 
-			// Handle Turn Changing etc
-			sockets[rooms[currPlayer.room].players[i]].emit("client.receiveShot", cueDx, cueDy);
-		}	
-		for (var i = 0; i < rooms[currPlayer.room].spectators.length; i++) { 
-			sockets[rooms[currPlayer.room].spectators[i]].emit("client.receiveShot", cueDx, cueDy);
+	socket.on('sendShot', function (cueDx, cueDy) {
+		if (currPlayer.state === 2 && currPlayer.player === rooms[currPlayer.room].turn) {
+			runMagicSimulation(function(board) {
+				if (rooms[currPlayer.room].turn === 0) {
+					rooms[currPlayer.room].turn = 1;
+				}
+				else {
+					rooms[currPlayer.room].turn = 0;
+				}
+				io.to('room-' + currPlayer.room).emit('client.newTurn', rooms[currPlayer.room].turn);
+			});
+		}
+		else {
+			socket.emit('client.errorMsg', 'It is not your turn');
 		}
 	});
 
