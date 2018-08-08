@@ -6,16 +6,19 @@ var currentTurn = -1;
 
 showWelcome();
 
+function emit(endpoint, data) {
+	if (!data) data = {};
+	console.log('Emitting ' + endpoint);
+	data.room = roomId;
+	socket.emit(endpoint, data);
+}
+
 $("#startBtn").click(function() {
 	var name = $("#nameInput").val();
 	socket = io();
 	setupSocket();
-	socket.emit("server.start", name);
+	emit("server.join", { name: name });
 });
-
-$("#createRoom").onclick = function() {
-	socket.emit("server.createRoom");
-};
 
 $(".startGame").click(function () {
 	socket.emit("server.startGame");
@@ -25,30 +28,16 @@ $(".leaveRoom").click(function () {
 	socket.emit("server.leaveRoom");
 });
 
-function showOverlay() { 
-	inGame = false;
-	$(".overlay").show();
-}
+
 function hideAll() { 
-	$(".lobby").hide();
-	$(".room").hide();
 	$(".overlay").hide();
 	$(".welcome").hide();
 }
+
 function showWelcome() { 
 	hideAll();
-	showOverlay();
+	$(".overlay").show();
 	$(".welcome").show();
-}
-function showLobby() {
-	hideAll();
-	showOverlay();
-	$(".lobby").show();
-}
-function showRoom() {
-	hideAll();
-	showOverlay();
-	$(".room").show();
 }
 
 function shootBall(cueDx, cueDy) { 
