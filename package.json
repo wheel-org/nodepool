@@ -1,20 +1,24 @@
 {
-  "name": "nodepool",
-  "version": "1.0.0",
-  "description": "Pool game",
-  "main": "server/index.js",
-  "scripts": {
-    "start": "node server/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/wheel-org/nodepool.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.15.4",
-    "socket.io": "^2.0.3",
-    "uuid": "^3.3.2"
-  }
+    "name": "nodepool",
+    "version": "1.0.0",
+    "description": "Pool game",
+    "main": "server/index.js",
+    "scripts": {
+        "start": "node server/index.js",
+        "dev": "nodemon server/index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wheel-org/nodepool.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.16.3",
+        "socket.io": "^2.1.1",
+        "uuid": "^3.3.2"
+    },
+    "devDependencies": {
+        "nodemon": "^1.18.4"
+    }
 }

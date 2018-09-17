@@ -1,151 +1,82 @@
 var socket;
-
-var playerStatus = -1; // -1 is NA, 0 is P1, 1 is P2, 2 is spec
 var inGame = false;
-var currentTurn = -1;
 
 showWelcome();
 
 function emit(endpoint, data) {
-	if (!data) data = {};
-	console.log('Emitting ' + endpoint);
-	data.room = roomId;
-	socket.emit(endpoint, data);
+    if (!data) data = {};
+    console.log('Emitting ' + endpoint);
+    data.room = roomId;
+    socket.emit(endpoint, data);
 }
 
-$("#startBtn").click(function() {
-	var name = $("#nameInput").val();
-	socket = io();
-	setupSocket();
-	emit("server.join", { name: name });
+$('#startBtn').click(function() {
+    var name = $('#nameInput').val();
+    socket = io();
+    setupSocket();
+    emit('server.join', { name: name });
 });
 
-$(".startGame").click(function () {
-	socket.emit("server.startGame");
+$('.startGame').click(function() {
+    socket.emit('server.startGame');
 });
 
-$(".leaveRoom").click(function () {
-	socket.emit("server.leaveRoom");
+$('.leaveRoom').click(function() {
+    socket.emit('server.leaveRoom');
 });
 
-
-function hideAll() { 
-	$(".overlay").hide();
-	$(".welcome").hide();
+function hideAll() {
+    $('.overlay').hide();
+    $('.welcome').hide();
 }
 
-function showWelcome() { 
-	hideAll();
-	$(".overlay").show();
-	$(".welcome").show();
+function showWelcome() {
+    $('.overlay').show();
+    $('.welcome').show();
 }
 
-function shootBall(cueDx, cueDy) { 
-	socket.emit("server.sendShot", cueDx, cueDy);
+function shootBall(cueDx, cueDy) {
+    emit('server.sendShot', { cueDx: cueDx, cueDy: cueDy });
 }
 
 function setupSocket() {
-	log("Setting up Connection...");
-	socket.on("client.lobby", function (rooms) {
-		showLobby();
-		// Enter lobby, load rooms
+    log('Setting up Connection...');
 
-		$("#lobbyRoomList").html(`<tr>
-			<th>ID</th>
-			<th>Players</th>
-			<th>Spectators</th>
-		</tr>`);
-		for(var i = 0; i < rooms.length; i++) {
-			var room = rooms[i];
+    socket.on('client.joinSuccess', function() {
+        hideAll();
+        inGame = true;
+    });
 
-			var roomBtn = $(`
-				<tr class="roomBtn" id="${room.id}">
-					<td>${room.id}</td>
-					<td>${room.numPlayers}</td>
-					<td>${room.numSpecs}</td>
-				</tr>
-			`);
+    // set showingGame to true when starting
 
-			roomBtn.click(function () {
-				socket.emit("server.joinRoom", $(this).attr("id"));
-			});
+    socket.on('client.roomCreated', function(room) {
+        loadRoom(room);
+    });
 
-			$("#lobbyRoomList").append(roomBtn);
-		}
-	});
+    socket.on('client.newPlayer', function(name) {
+        log('Player joined: ' + name);
+        loadRoom(room);
+    });
 
-	socket.on("client.joinedPlayer", function(room, newPlayerStatus) {
-		loadRoom(room);
-		log("Joined as Player " + (newPlayerStatus + 1));
-		playerStatus = newPlayerStatus;
-		updateState();
-	});
+    socket.on('client.receiveShot', function(data) {
+        ballHasBeenShot(data.cueDx, data.cueDy);
+    });
 
-	socket.on("client.joinedSpec", function(room, newPlayerStatus) {
-		$(".overlay").hide();
-		// Start rendering
-		log("Joined as Spectator");
-		inGame = true;
-		playerStatus = newPlayerStatus;
-		updateState();
-	});
+    socket.on('client.error', function(data) {
+        alert(data.error);
+    });
 
-	// set showingGame to true when starting
-	
-	socket.on("client.roomCreated", function(room) {
-		loadRoom(room);
-	});
+    socket.on('client.gameStart', function() {});
 
-	socket.on("client.newPlayer", function(name) {
-		log("Player joined: " + name);
-		loadRoom(room);
-	});
-
-	socket.on('client.receiveShot', function (cueDx, cueDy) {
-		ballHasBeenShot(cueDx, cueDy);		
-	});
-
-	socket.on('client.errorMsg', function (message) {
-		alert(message);
-	});
-
-	socket.on('client.gameStart', function () {
-
-	});
+    socket.on('client.spectator', function(_game) {
+        game = _game;
+    });
 }
 
-function loadRoom(room) {
-	showRoom();
-	var playerList = room.players.reduce(function(acc, curr) {
-		return "<li>" + curr + "</li>";
-	}, "");
-
-	var spectatorList = room.spectators.reduce(function(acc, curr) {
-		return "<li>" + curr + "</li>";
-	}, "");
-
-	$(".roomInfo").html(`
-		<p>Id: ${room.id}</p>
-		<p>Players</p>
-		<ul>${playerList}</ul>
-		<p>Spectators</p>
-		<ul>${spectatorList}</ul>
-	`);
-	
+function log(message) {
+    $('.log').append(message + '\n');
 }
 
-function log(message) { 
-	$(".log").append(message + "\n");
-}
-
-function updateState() {
-	$(".playerStatus h4").html(["You are Player 1", "You are Player 2", "You are Spectating"][playerStatus]);
-}
-
-function isPlayer() { 
-	return playerStatus === 0 || playerStatus === 1;
-}
-
-function isSpectator() { 
-	return playerStatus === 2;
+function isPlayer() {
+    return true;
 }
